@@ -78,7 +78,7 @@ while True:
         cv2.putText(frame,"x = " + str(x) + " y= " + str(y), bottomLeftCornerOfText, font, fontScale, fontColor, lineType)
         cv2.imshow("Frame", frame)
         
-        ser.sendData(x + " " + y)
+        ser.sendData(x)
         #degrees = math.atan2(y,x)/math.pi * 180 
         #print("y position = " + str(round(degrees, 1)))
 
