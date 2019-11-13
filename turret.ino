@@ -4,9 +4,9 @@
 
 
 Servo servoX;
-servo servoY;
 
 void setup() { 
+  Serial.begin(9600); 
   myservo.attach(5);
 } 
 
