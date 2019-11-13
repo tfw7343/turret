@@ -6,6 +6,8 @@ import sys
 import numpy as np
 import math
 
+
+# using arduino uno
 # ser = serial.Serial("/dev/ttyUSB0")  # open serial port
 # ser = serial.Serial("COM3",timeout=1)
 # print(ser.name)         # check which port was really used
@@ -75,8 +77,8 @@ while True:
 
         cv2.putText(frame,"x = " + str(x) + " y= " + str(y), bottomLeftCornerOfText, font, fontScale, fontColor, lineType)
         cv2.imshow("Frame", frame)
-
-
+        
+        ser.sendData(x + " " + y)
         #degrees = math.atan2(y,x)/math.pi * 180 
         #print("y position = " + str(round(degrees, 1)))
 
