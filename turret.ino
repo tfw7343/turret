@@ -2,7 +2,7 @@
 
 #include <Servo.h> 
 
-
+int LED;
 Servo servoX;
 
 void setup() { 
@@ -13,7 +13,7 @@ void setup() {
 void serialEvent() {
   cords = Serial.readString();
 
-  servoX.write(parseDataX(cords));
+  servoX.write(cords);
 
 
 }
