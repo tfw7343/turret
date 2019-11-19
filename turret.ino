@@ -3,36 +3,54 @@
 #include <stdlib.h>
 
 
+
 String str;
+
 
 int LED = 6;
 Servo servoX;
+Servo servoY;
 String ascii_servoX;
 String ascii_servoY;
 
 
 void setup() { 
   Serial.begin(9600);
-  servoX.attach(5);
+  servoY.attach(5);
   servoX.write(0);
+  servoX.attach(6);
+  servoY.write(0);
 } 
 
-void serialEvent() {
 
-  String num1 = Serial.readString();
-  int num = num1.toInt();
+void serialEvent() {
+  String tempModify = Serial.readString();
   
-  if (num1 == "420") {
-    analogWrite(LED, 0);
-    }
-  if (num1 == "69") {
-    analogWrite(LED, 255);
-    }
-  if (num1 == "666") {
-    
-    }
-  Serial.println(num1);
+  servoX.write(parseDataX(tempModify));
+  Serial.println(parseDataX(tempModify));
+
+}
+
+
+int parseDataX(String data){
+  data.remove(data.indexOf(":"));
+  data.remove(data.indexOf("("));
+  data.remove(data.indexOf(")"));
+  data.remove(data.indexOf("X"), 2);
+
+  return data.toInt();
+}
+
+int parseDataY(String data){
+  data.remove(0,data.indexOf(":") + 1);
+  data.remove(data.indexOf("Y"), 1);
+  data.remove(data.indexOf("("));
+  data.remove(data.indexOf(")"));
+  return data.toInt();
   
-  servoX.write(num);
-  
+}
+
+
+void loop() {
+
 }
