@@ -6,14 +6,14 @@ import sys
 import numpy as np
 import math
 import serial
-# ser = serial.Serial('/dev/ttyUSB0')  # open serial port
+# ser = serial.Serial('/dev/ttyUSB0')
 # print(ser.name)         # check which port was really used
 
 framerate = 30
 
 a = 0
 b = 1
-ser = serial.Serial("/dev/cu.usbserial-1410",timeout=1)
+ser = serial.Serial("/dev/cu.usbserial-1410",timeout=10)
 
 def sendData(data):
     #ser.write(bytes(data))
@@ -21,17 +21,6 @@ def sendData(data):
     #if x == lower than 180...
 
 
-"""
-radius = 60;
-angle  = 140;
-xthing = radius * Math.sin(Math.PI * 2 * angle / 360);
-ything = radius * Math.cos(Math.PI * 2 * angle / 360);
-print('Points coors are  x='+ math.round(x * 100) / 100 +', y=' + math.round(y * 100) / 100)"""
-
-# formula to detect the co-ords of the face in the camera
-# x_face = radius * Math.sin(Math.PI * 2 * angle / 360);
-
-# y_face = radius * Math.cos(Math.PI * 2 * angle / 360);
 
 
 
@@ -55,8 +44,12 @@ cap.set(cv2.CAP_PROP_FPS, 60)
 
 
 cv2.namedWindow("Frame")
-cv2.namedWindow("Camera_View")
 cv2.createTrackbar("Neighbours", "Frame", 5, 20, nothing)
+
+cordsX = 0
+cordsY = 0
+x = 0
+y = 0
 
 while True:
     fps = int(cap.get(5))
@@ -65,18 +58,19 @@ while True:
     neighbours = cv2.getTrackbarPos("Neighbours", "Frame")
 
     faces = face_cascade.detectMultiScale(gray, 1.3, neighbours)
-    cv2.imshow("Camera_VIEW", Camera_view)
+    ser.write("X" + str(x / 5) + ":Y" + str(y / 5))
     for rect in faces:
 
         (x, y, w, h) = rect
         bottomLeftCornerOfText = (x,y)
 
-        p1 = (x, y )
+        p1 = (x, y )# top left
         p2 = (x + w // 2, y + h) #bottom point
-        p3 = (x + w, y ) #top line
+        p3 = (x + w, y ) #top right
 
         # Drawing the triangle
         # on the black window With given points
+        # (X, Y) = (x1 + x2 + x3//3, y1 + y2 + y3//3)
         cv2.line(frame, p1, p2, (0, 0, 255), 3)
         cv2.line(frame, p2, p3, (0, 0, 255), 3)
         cv2.line(frame, p1, p3, (0, 0, 255), 3)
@@ -86,30 +80,24 @@ while True:
         cv2.imshow("Frame", frame)
 
 
-        degrees = math.atan2(y,x)/math.pi * 180
-        print(x / 5)
-        #print("y position = " + str(round(degrees, 1)))
-        time.sleep(0.1)
+#       degrees = math.atan2(y,x)/math.pi * 180
+        cordsX = x / 5
+        cordsY = y / 5
+        print(ser.write(cordsX))
+        # print("y position = " + str(round(degrees, 1)))
 
-        ser.write(x)
 
-        #         # (X, Y) = (x1 + x2 + x3//3, y1 + y2 + y3//3)
-        centroid = ((p1[0]+p2[0]+p3[0])//3, (p1[1]+p2[1]+p3[1])//3)
+
+
 
         # detects the angle of the face on the circle using y
 
         key = cv2.waitKey(1)
-        if key == 32:#32 = space key
+        if key == 32:
             ser.close()
             break
-        # if key == 108:
-        #     if a == 0:
-        #         ser.write("LED_ON\n")
-        #         a == 1
-        #     if a == 1:
-        #         ser.write("LED_OFF\n")
-        #         a == 0
+
 
 cap.release()
 cv2.destroyAllWindows()
-ser.close()
+
