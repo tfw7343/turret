@@ -1,103 +1,129 @@
-import os
 import cv2
-import serial #documentation: https://pythonhosted.org/pyserial/
-import time
-import sys
 import numpy as np
-import math
+import sys
 import serial
-# ser = serial.Serial('/dev/ttyUSB0')
-# print(ser.name)         # check which port was really used
+import os
+import time
+import calendar
 
-framerate = 30
+start_time = time.time()
 
-a = 0
-b = 1
-ser = serial.Serial("/dev/cu.usbserial-1410",timeout=10)
-
-def sendData(data):
-    #ser.write(bytes(data))
+if sys.argv[2] == "--help":
+    print("==========================<USAGE>==========================")
+    print("== python GUI_recognition <serial_port_name> <options>   ==")
+    print("===========================================================")
     print("")
-    #if x == lower than 180...
+    print("-s             |           Serial data is truned on; if not the turret will not move or shoot the lazer. To leave serial data off do not use -s")
+    print("--help         |           Displays this help msg.")
+    sys.exit()
+
+ports = 0
+port = 0
+LASER_STAT = 0
+TopRightCorner = (5, 15)
+
+FACE_LOCATION_POINTER_X = 0
+FACE_LOCATION_POINTER_Y = 0
+fps = 0
 
 
-
-
+escape_char = " "
 
 font = cv2.FONT_HERSHEY_SIMPLEX
-#bottomLeftCornerOfText = (x,y)# moveed to ine 46
-fontScale = 0.5
-fontColor = (255,255,255)
-lineType = 2
+fontScale = 0.4
+fontWhite = (255, 255, 255)
+fontGreen = (0, 255, 0)
+fontRed = (0, 0, 255)
+fontOrange = (102, 178, 255)
+orange_orange = (0, 128, 255)
+serial_port = sys.argv[1]
+lineType = 1
 radius = 10
 
-#haarcascade = https://pysource.com/wp-content/uploads/2018/10/haarcascades.zip
+cascPath = "haarcascade_frontalface_default.xml"
+faceCascade = cv2.CascadeClassifier(cascPath)
 
-def nothing(x):
-    pass
+video_capture = cv2.VideoCapture(0)
+video_capture1 = cv2.VideoCapture(0)
+def cv2_textA(text, TopRightCorner1):
+    cv2.putText(frame, text, TopRightCorner1, font, fontScale, fontRed, lineType)
 
+def cv2_text(text, fontColour, location):
+    cv2.putText(frame,text, location, font, fontScale, fontColour, lineType)
 
-face_cascade = cv2.CascadeClassifier('haarcascade_frontalface_default.xml')
+if sys.argv[2] == "-s":
+    try:
+        ser = serial.Serial(serial_port)
 
-cap = cv2.VideoCapture(0)
-cap.set(cv2.CAP_PROP_FPS, 60)
-
-
-cv2.namedWindow("Frame")
-cv2.createTrackbar("Neighbours", "Frame", 5, 20, nothing)
-
-cordsX = 0
-cordsY = 0
-x = 0
-y = 0
+        if serial_port == sys.argv[1]:
+            ports = 1
+    except serial.SerialException:
+        print("Could not open SER port. Running without SER. Use '--help' to see usage/option")
+        ports = 0
 
 while True:
-    fps = int(cap.get(5))
-    _, frame = cap.read()
+
+    # Capture frame-by-frame
+    fps = video_capture.get(cv2.CAP_PROP_FPS)
+    ret, frame = video_capture.read()
+    ret1 , frame1   = video_capture1.read()
+    cv2.rectangle(frame,(0, 1000),(300,0), orange_orange, -1)
+    cv2.rectangle(frame,(10, 710),(290, 10), fontOrange, 1)
+    cv2.rectangle(frame,(0,0),(1278,718), orange_orange, 5)
+
+    if port == 1:
+        ser.write("X" + str(x / 5) + ":Y" + str(y / 5))
+
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-    neighbours = cv2.getTrackbarPos("Neighbours", "Frame")
 
-    faces = face_cascade.detectMultiScale(gray, 1.3, neighbours)
-    ser.write("X" + str(x / 5) + ":Y" + str(y / 5))
-    for rect in faces:
+    faces = faceCascade.detectMultiScale(
+        gray,
+        scaleFactor=1.1,
+        minNeighbors=10,
+        minSize=(30, 30),
+    )
+    # text on panel
+    cv2_text("POINTER: X=" + str(FACE_LOCATION_POINTER_X)+ ", Y=" + str(FACE_LOCATION_POINTER_Y), fontWhite, (15,40))
+    cv2_text("FACES LEN: " + str(len(faces)), fontWhite, (15, 55))
+    cv2_text("FPS: " + str(fps), fontWhite, (15, 70))
+    cv2_text("CAM: " + str(video_capture), fontWhite, (15,85))
+    cv2_text("MAX DETECTION DIS: 10m", fontWhite, (15,100))
+    cv2_text("NEIGHBORS: " + str(10), fontWhite, (15, 130))
+    cv2_text("TIME SINCE START: " + str(round(time.time() - start_time, 3)), fontWhite, (15, 145)) #start time
 
-        (x, y, w, h) = rect
-        bottomLeftCornerOfText = (x,y)
-
-        p1 = (x, y )# top left
-        p2 = (x + w // 2, y + h) #bottom point
-        p3 = (x + w, y ) #top right
-
-        # Drawing the triangle
-        # on the black window With given points
-        # (X, Y) = (x1 + x2 + x3//3, y1 + y2 + y3//3)
-        cv2.line(frame, p1, p2, (0, 0, 255), 3)
-        cv2.line(frame, p2, p3, (0, 0, 255), 3)
-        cv2.line(frame, p1, p3, (0, 0, 255), 3)
+    # end of text on panel
 
 
-        cv2.putText(frame,"x = " + str(x) + " y= " + str(y), bottomLeftCornerOfText, font, fontScale, fontColor, lineType)
-        cv2.imshow("Frame", frame)
+    cv2_text("PRESS 'SPACE' TO EXIT.", fontWhite, (15, 705))
+    if ports == 1:
+        cv2_text("PORT NAME: " + str(sys.argv[1]), fontWhite, (15, 115))
+    else:
+        cv2_text("WARNING: RUNNING WITHOUT SER", fontRed, (15,115))
 
 
-#       degrees = math.atan2(y,x)/math.pi * 180
-        cordsX = x / 5
-        cordsY = y / 5
-        print(ser.write(cordsX))
-        # print("y position = " + str(round(degrees, 1)))
+    if len(faces) == 1:
+        cv2_text("LASER: ON", fontWhite, (15,25))
+        ser.write("laser_on")
+    else:
+        cv2_text("LASER: OFF", fontWhite, (15,25))
+        ser.write("laser_off")
+    # Draw a rectangle around the faces
+    for (x, y, w, h) in faces:
+        cv2.rectangle(frame, (x , y), (x+w, y+h), fontRed, 1)
+        LASER_STAT = 1
+        FACE_LOCATION_POINTER_X = x
+        FACE_LOCATION_POINTER_Y = y
+        cv2.line(frame, (100000, y + h // 2), (300, y + h // 2), fontRed, 1)
+        cv2.line(frame, (x + w // 2, 100000), (x + w // 2, 0), fontRed, 1)
+        cv2_text("" + str(x + w //2) + ":" + str(y + h // 2), fontWhite, (x, y + 15))
 
+    # Display the resulting frame
+    cv2.flip(frame, 0)
+    cv2.imshow('TURRET UI', frame)
 
+    if cv2.waitKey(1) == 32:
+        break
 
-
-
-        # detects the angle of the face on the circle using y
-
-        key = cv2.waitKey(1)
-        if key == 32:
-            ser.close()
-            break
-
-
-cap.release()
+# When everything is done, release the capture
+video_capture.release()
 cv2.destroyAllWindows()
-
