@@ -1,3 +1,3 @@
-# python_arudino_turret
+# python_arduino_turret
 "desciptions are stupid"
-- Terence
+-- Terence
