@@ -8,6 +8,7 @@ String str;
 
 
 int LED = 6;
+int Laser = 5;
 Servo servoX;
 Servo servoY;
 String ascii_servoX;
@@ -15,6 +16,7 @@ String ascii_servoY;
 
 
 void setup() { 
+  pinMode(Laser, OUTPUT);
   Serial.begin(9600);
   servoY.attach(5);
   servoX.write(0);
@@ -25,7 +27,13 @@ void setup() {
 
 void serialEvent() {
   String tempModify = Serial.readString();
-  
+    
+  if (tempModify == "laser_on") {
+    digitalWrite(Laser, 255);
+  } else {
+    if (tempModify == "laser_off")
+      digitalWrite(Laser, 0);
+  }
   servoX.write(parseDataX(tempModify));
   Serial.println(parseDataX(tempModify));
 
@@ -52,5 +60,5 @@ int parseDataY(String data){
 
 
 void loop() {
-
+//u w0t m8!?!?!!
 }
