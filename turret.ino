@@ -35,8 +35,8 @@ void serialEvent() {
       digitalWrite(Laser, 0);
   }
   servoX.write(parseDataX(tempModify));
+  servoY.write(parseDataY(tempModifu));
   Serial.println(parseDataX(tempModify));
-
 }
 
 
