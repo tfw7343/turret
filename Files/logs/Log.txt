@@ -1,0 +1,13 @@
+----------[START 2019-12-20 07:30:16.747000]----------
+[INFO] sampling frames from web cam...
+[INFO] sampling THREADED frames from web cam...
+[WARN] Running without ser. Turret will not move (-s not specified)
+[INFO] CAM name: <VideoCapture 000000000A882270>
+[INFO] New face found at 2019-12-20 07:30:24.557000: Current Total Faces detected: 1
+[SAVE] RECORDING_2019-12-20 07:30:16.683000.avi has been saved
+[SAVE] RECORDING_2019-12-20 07:30:16.683000.avi has been saved
+[STOP] '32' HAS BEEN PUSHED... STARTING ENDING SEQUENCE
+[INFO] Total faces detected: 2
+[INFO] Approx. FPS: 15.65
+[INFO] Elapsed time: 12.14 Seconds
+----------[END OF LOG 2019-12-20 07:30:32.184000]----------
